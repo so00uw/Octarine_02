@@ -170,7 +170,7 @@
   // =========================================
   // [7] 그리기 로직 (기존 코드 100% 유지)
   // =========================================
-  function drawProjection(faceLandmarks, videoElement) {
+  function drawProjection(faceLandmarks, videoElement, showVFX = true) {
       // 배경 클리어
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -195,7 +195,7 @@
       ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
       // VFX 합성 (기존 로직 유지)
-      if (vfxVideo.readyState >= 2) {
+      if (showVFX && vfxVideo.readyState >= 2) {
           ctx.globalCompositeOperation = 'screen'; 
           ctx.globalAlpha = 0.7; 
           ctx.drawImage(vfxVideo, 0, 0, canvas.width, canvas.height);
@@ -226,7 +226,7 @@
               ctx.fillRect(0, 0, canvas.width, canvas.height);
 
               if (msg.payload.landmarks) {
-                  drawProjection(msg.payload.landmarks, img); // img를 비디오 대신 전달
+                  drawProjection(msg.payload.landmarks, img, false); // img를 비디오 대신 전달
               } else {
                   // 혹시 랜드마크가 없으면 그냥 그림 (안전장치)
                   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
