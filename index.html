@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1" />
+  <title>Exhibition</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="scale-wrapper">
+    <div id="invisibleLogoBtn" class="invisible-logo-btn"></div>
+  <!-- Global fixed header (logo + step icons) -->
+  <header class="topbar" id="topbar" aria-hidden="false">
+    <div class="topbar-inner">
+      <div class="steps">
+        <img id="step-consent" class="step-icon" src="assets/img/step-consent.png" alt="동의" />
+        <img id="step-scan" class="step-icon" src="assets/img/step-scan.png" alt="스캔" />
+      </div>
+
+      <img id="logo" class="logo" src="assets/img/logo.png" alt="logo" />
+
+      <div class="steps">
+        <img id="step-analyze" class="step-icon" src="assets/img/step-analyze.png" alt="분석" />
+        <img id="step-result" class="step-icon" src="assets/img/step-result.png" alt="결과" />
+      </div>
+    </div>
+  </header>
+
+  <!-- App root -->
+  <main id="app" class="app">
+    <!-- 1) Start -->
+    <section id="screen-start" class="screen screen-start is-active" data-screen="start">
+      <video id="bgVideo" class="bg-video" autoplay muted loop playsinline preload="auto">
+        <source src="assets/video/intro.mp4" type="video/mp4" />
+      </video>
+
+      <button id="btnStart" class="btn-image" type="button" aria-label="Start">
+        <img src="assets/img/btn-start.png" alt="Start" />
+      </button>
+      <img class="deco-image" src="assets/img/start_deco.png" alt="장식 이미지">
+    </section>
+
+    <!-- 2) Consent (placeholder for now) -->
+    <section id="screen-consent" class="screen" data-screen="consent">
+      <div class="panel">
+        <h1 class="panel-title">동의서</h1>
+        <p class="panel-desc">본 작품은 19세기 체자레 롬브로소의 범죄학 이론을 비판적으로 재해석한 예술 작품입니다. 시스템이 제시하는 '범죄형', '위험도', '성향' 등의 분석 결과는 예술적 허구(Fiction)이며, 실제 과학적 근거가 없음을 고지합니다. 관람객은 이에 동의하며 참여합니다.</p>
+
+        <div class="consent-list">
+          <label class="check">
+            <input type="checkbox" class="consent" />
+            <span>생체 정보 수집 및 분석에 동의함</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" class="consent" />
+            <span>결과 데이터의 전시장 내 송출에 동의함</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" class="consent" />
+            <span>분석 결과가 예술적 허구임을 인지함</span>
+          </label>
+        </div>
+
+        <button id="btnToScan" class="btn-next" type="button" disabled>다음</button>
+      </div>
+      <img class="consent-deco" src="assets/img/consent_deco.png" draggable="false">
+    </section>
+
+    <!-- 3) Scan -->
+    <section id="screen-scan" class="screen" data-screen="scan">
+    <div class="scan-container">
+
+        <!-- Camera Box -->
+        <div class="camera-box">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="overlay"></canvas>
+        </div>
+
+        <!-- Fixed Guide Frame -->
+        <div class="guide-frame"></div>
+
+        <!-- Instruction -->
+        <div id="scanHint" class="scan-hint">얼굴을 네모 안에 맞춰줘</div>
+
+        <!-- Capture Button -->
+        <button id="btnCapture" class="btn-capture" disabled>촬영</button>
+
+    </div>
+    <img class="scan-deco" src="assets/img/scan_deco.png" draggable="false">
+    </section>
+
+<!-- 4) Analyze -->
+<section id="screen-analyze" class="screen" data-screen="analyze">
+  <div class="analyze-container">
+    <!-- Camera Box (same position/size as scan) -->
+    <div class="camera-box">
+      <img id="analyzePhoto" alt="captured" />
+      <div id="scanLine" class="scan-line"></div>
+    </div>
+
+    <!-- Left: Data cleaning -->
+    <div class="log-block lb-clean">
+      <div class="lb-title">Data cleaning</div>
+      <div class="lb-underline"></div>
+      <div class="log-clip">
+        <div class="log-stream" id="logClean"></div>
+      </div>
+    </div>
+
+    <!-- Left: Data integration -->
+    <div class="log-block lb-integ">
+      <div class="lb-title">Data integration</div>
+      <div class="lb-underline"></div>
+      <div class="log-clip">
+        <div class="log-stream" id="logInteg"></div>
+      </div>
+    </div>
+
+    <!-- Right: Diagnostic Analytics -->
+    <div class="log-block lb-diagn">
+      <div class="lb-title">Diagnostic Analytics</div>
+      <div class="lb-underline"></div>
+      <div class="log-clip">
+        <div class="log-stream" id="logDiagn"></div>
+      </div>
+    </div>
+  </div>
+  <img class="analyze-deco" src="assets/img/analyze_deco.png" draggable="false">
+</section>
+
+<!-- 5) Result -->
+<section id="screen-result" class="screen" data-screen="result">
+  <div class="result-container">
+
+    <!-- Camera area (same position) -->
+<div class="camera-box">
+  <img id="resultPhoto" alt="result" />
+</div>
+
+<img id="resultOverlay" class="overlay-ui" src="assets/img/result_overlay_ui.png" alt="" />
+
+    <!-- LEFT : Intelligence -->
+    <div class="intel-block">
+      <div class="intel-title">지능 수준:</div>
+      <div id="intelGrade" class="intel-grade"></div>
+      <div id="intelDetails" class="intel-details"></div>
+    </div>
+
+    <!-- RIGHT : Crime scores -->
+    <div class="crime-block">
+      <div class="crime-title">범죄 유형 점수</div>
+      <div id="crimeScores" class="crime-scores"></div>
+      <div id="crimeTop" class="crime-top"></div>
+    </div>
+
+    <button id="btnRestartFinal" class="btn-restart">다시하기</button>
+
+  </div>
+  <img class="restart-deco" src="assets/img/restart-btn.png" draggable="false">
+</section>
+  </main>
+</div>
+<div id="infoModal" class="info-modal hidden">
+  <div class="info-dim"></div>
+  <img class="info-img" src="assets/img/exhibition_info.png" alt="전시 설명">
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="js/app.js" defer></script>
+
+</body>
+</html>

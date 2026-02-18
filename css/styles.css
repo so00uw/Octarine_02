@@ -1,0 +1,607 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik+80s+Fade&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/woff2/SUIT.css');
+:root{
+  --w: 1920;
+  --h: 1080;
+  --bg: #000;
+  --fg: #fff;
+  --dim: 0.40;
+  --dim-dark: 0.50;
+}
+
+*{ box-sizing:border-box; }
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  overflow: hidden; /* 스크롤바와 잘림 현상 원천 차단 */
+  /* display: flex 관련 속성은 모두 삭제합니다 */
+}/* [새로 추가] 1920x1080 고정 도화지 */
+/* 1920x1080 고정 도화지 */
+#scale-wrapper {
+  position: absolute; /* flex 대신 절대 위치 사용 */
+  left: 50%;
+  top: 50%;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: center center;
+  /* transform: translate(-50%, -50%) scale(...) 은 app.js에서 처리 */
+}/* .app은 래퍼 안에서 꽉 차게만 설정 */
+.app {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #00000000;
+}
+/* 추가: 배경 비디오가 .app 크기에 딱 맞도록 보강 */
+.bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+}
+/* ---------- Topbar ---------- */
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:180px;           /* 시안 안정성: 상단바 고정 */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+  pointer-events:none;    /* 로고/아이콘은 기능 없음 */
+  z-index: -2;
+}
+
+.topbar-inner{
+  width: min(1920px, 100%);
+  padding: 26px 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 330px;
+}
+
+.logo{
+  width:130px;
+  height:130px;
+  object-fit:contain;
+}
+
+.steps{
+  display:flex;
+  gap: 270px;
+  align-items:center;
+}
+
+.step-icon{
+  height: 80px;           /* 원본 크기 제각각이라 높이로 통일 */
+  width: auto;
+  opacity: var(--dim);
+  filter: none;
+}
+
+/* ---------- Screens ---------- */
+.screen{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.screen.is-active{ display:flex; }
+
+.screen-start{
+  align-items:flex-end;
+  justify-content:center;
+  padding-bottom: 90px; /* 시안 하단 버튼 느낌 */
+}
+
+/* Background video */
+.bg-video{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit: cover; /* 기본 cover */
+  z-index:0;
+}
+
+/* Start button */
+.btn-image{
+  position:relative;
+  left: 394px;
+  bottom: 60px;
+  z-index:1;
+  border:0;
+  background:transparent;
+  padding:0;
+  cursor:pointer;
+}
+.btn-image img{
+  width:240px;
+  height:63px;
+  display:block;
+}
+.deco-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Generic panel placeholders */
+.panel{
+  width:min(900px, 90vw);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  padding:28px 28px 22px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
+}
+.panel-title{
+  margin:0 0 10px;
+  font-family: 'SUIT', sans-serif;
+  font-size:28px;
+  text-align: center;
+}
+.panel-desc{
+  margin:0 0 18px;
+  opacity:.75;
+  line-height:1.4;
+  font-family: 'SUIT', sans-serif;
+  font-size:22px;
+}
+.consent-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-bottom:18px;
+  font-family: 'SUIT', sans-serif;
+  font-size:20px;
+}
+.check{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  line-height:1.35;
+}
+.btn-next{
+  height:44px;
+  padding:0 18px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color:#fff;
+  cursor:pointer;
+  font-family: 'SUIT', sans-serif;
+}
+.btn-next:disabled{
+  opacity:.35;
+  cursor:not-allowed;
+}
+.consent-deco{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* 시작 화면에서는 단계 아이콘만 숨김 (로고는 유지) */
+body[data-screen="start"] .steps{
+  display: none;
+}
+
+/* =========================
+   SCAN SCREEN
+========================= */
+
+.scan-container{
+  position:relative;
+  width:1920px;
+  height:1080px;
+}
+
+/* Camera box (805x672 at exact position) */
+.camera-box{
+  position:absolute;
+  left:558px;
+  top:201px;
+  width:805px;
+  height:672px;
+  background:#111;
+  overflow:hidden;
+}
+
+.camera-box video,
+.camera-box canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* Fixed guide frame (green box) */
+.guide-frame{
+  position:absolute;
+  left:815px;
+  top:351px;
+  width:289px;
+  height:301px;
+  border:4px solid #00ff00;
+  pointer-events:none;
+}
+
+/* Hint text */
+.scan-hint{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  text-align: center;
+  bottom: 120px;
+  font-size:28px;
+  opacity:.8;
+  font-family: 'SUIT', sans-serif;
+}
+
+/* Capture button */
+.btn-capture{
+  position:absolute;
+  right:120px;
+  bottom:120px;
+  width:220px;
+  height:70px;
+  font-size:22px;
+  background:#000000;
+  border:none;
+  color:#000000;
+  border-radius:12px;
+  cursor:not-allowed;
+  transition:.2s;
+}
+
+.btn-capture.active{
+  background:#00ff5a;
+  color:#000;
+  cursor:pointer;
+}
+.scan-deco{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+/* =========================
+   ANALYZE SCREEN (Step 4)
+========================= */
+
+.analyze-container{
+  position:relative;
+  width:1920px;
+  height:1080px;
+}
+
+/* analyze uses same camera-box position/size */
+#screen-analyze .camera-box{
+  background:#000;
+}
+
+/* captured photo fills the camera box */
+#analyzePhoto{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:none; /* analyze 진입 시 JS에서 보여줌 */
+}
+
+/* scan line: moves top -> bottom in 5s */
+.scan-line{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:6px;
+  background:#00ff00;
+  opacity:0.9;
+  transform: translateY(-10px);
+  display:none;
+  z-index: 10;
+  will-change: top, opacity;
+}
+@keyframes scanMove {
+  0%   { top: 0%; opacity: 0; }
+  10%  { opacity: 0.9; } /* 나타나기 */
+  90%  { opacity: 0.9; } /* 유지하기 */
+  100% { top: 100%; opacity: 0; } /* 바닥에 닿으면 투명해지기 */
+}
+
+/* Log blocks positioning (based on your analyze mock) */
+.log-block{
+  position:absolute;
+  color: #3f3;;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+/* Titles */
+.lb-title{
+  font-size:34px;
+  letter-spacing:0.3px;
+  margin-bottom:10px;
+}
+.lb-underline{
+  width:100%;
+  height:2px;
+  background: #3f3;;
+  margin-bottom:12px;
+}
+
+/* clip area = visible box. stream scrolls inside. */
+.log-clip{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+}
+.log-stream{
+  will-change: transform;
+  font-size:14px;
+  line-height:1.35;
+  opacity:0.85;
+  white-space:pre;
+}
+
+/* 좌측 상단: Data cleaning */
+.lb-clean{
+  left:97px;
+  top:218px;
+  width:347px;
+  height:300px;
+  font-family: "Rubik 80s Fade", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* 좌측 하단: Data integration */
+.lb-integ{
+  left:97px;
+  top:520px;
+  width:347px;
+  height:331px;
+  font-family: "Rubik 80s Fade", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* 우측: Diagnostic Analytics */
+.lb-diagn{
+  left:1477px;
+  top:218px;
+  width:347px;
+  height:637px;
+  font-family: "Rubik 80s Fade", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+.analyze-deco{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+/* =========================================
+   분석 화면: 오른쪽 폭포수 애니메이션 (수정본)
+   ========================================= */
+.lb-diagn .log-stream {
+  /* 시간을 8s -> 30s로 확 늘려서 속도를 자연스럽게 낮춤 */
+  animation: waterfallUp 30s linear infinite; 
+}
+
+/* 폭포수 마법의 키프레임 */
+@keyframes waterfallUp {
+  /* 100% 였던 시작 위치를 0%로 바꿔서 딜레이 없이 즉각 보이면서 올라가게 함 */
+  0%   { transform: translateY(0%); }   
+  100% { transform: translateY(-100%); } 
+}
+/* =========================
+   RESULT SCREEN
+========================= */
+
+.result-container{
+  position:relative;
+  width:1920px;
+  height:1080px;
+}
+
+#resultPhoto{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+
+/* Intelligence */
+.intel-block {
+  position: absolute;
+
+  left: 348px;      /* ← 좌우 이동 */
+  top: 303px;       /* ← 상하 이동 */
+
+  width: 420px;     /* ← 텍스트 영역 폭 */
+  z-index: 5;
+  font-family: 'SUIT', sans-serif;
+}
+
+.intel-title {
+  font-size: 34px;
+  margin-bottom: 25px;
+  color: rgb(0, 0, 0);;
+  font-weight: 600;
+
+}
+
+#intelGrade{ 
+  position:absolute; left:190px; top:0;
+  font-size: 34px;
+  color: rgb(0, 0, 0);;
+  font-weight: 600;
+ }
+.intel-details {
+  margin-top: 10px;
+  font-size: 20px;
+  line-height: 25px;
+    color: #3f3;;
+
+}
+#intelDetails div{
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+/* Crime */
+.crime-block {
+  position: absolute;
+
+  left: 1216px;   
+  bottom: 380px;
+
+  width: 660px;
+  z-index: 5;
+  font-family: 'SUIT', sans-serif;
+}
+
+.crime-title{ 
+  position:absolute; left:1312; top:50;
+  font-size: 0px;
+  color: rgb(0, 0, 0);;
+ }
+
+.crime-scores {
+  font-size: 20px;
+  line-height: 32px;
+      color: #3f3;;
+
+}
+#crimeScores div{
+  font-size: 20px;
+  margin-bottom: 10px;
+ }
+.crime-top {
+  position: absolute;
+
+  left: 5px;
+  top: 265px;
+
+  font-size: 34px;
+    color: rgb(0, 0, 0);;
+  font-weight: 600;
+}
+
+.btn-restart{
+  position:absolute;
+  bottom:80px;
+  left:50%;
+  transform:translateX(-50%);
+  width:260px;
+  height:50px;
+  font-size:22px;
+  font-family: 'SUIT', sans-serif;
+  background: none;
+  border: none;
+  color: #0eff0e00;
+  cursor: pointer;
+  z-index: 5;
+}
+.restart-deco{
+  position: absolute;
+  width: 150px;
+  right: 880px;
+  bottom: 80px;
+  z-index: 4;
+}
+#screen-result .camera-box { position:absolute; } /* 기존 camera-box 규칙 유지 */
+#resultPhoto{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; }
+.overlay-ui{ position:absolute; left:0; top:0; width:1920px; height:1080px; object-fit:contain; z-index:3; pointer-events:none; }
+
+.result-container {
+  position: relative;
+}
+/* =========================================
+   [추가] 상단 투명 버튼 & 전시 설명 팝업 스타일
+   ========================================= */
+
+/* 1. 로고 위를 덮을 투명 버튼 (빨간 테두리 버전) */
+.invisible-logo-btn {
+  position: absolute;
+  top: 25px;  /* 로고 위치에 맞춰 조정 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130px;
+  height: 130px;
+  z-index: 9999; 
+  cursor: pointer;
+
+}
+
+/* 2. 팝업창 스타일 */
+.info-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 99999;
+  display: flex; justify-content: center; align-items: center;
+  
+  /* 부드럽게 나타나기 효과 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* 팝업이 보일 때 */
+.info-modal:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 팝업이 숨겨질 때 */
+.info-modal.hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 검은 배경 */
+.info-dim {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+}
+
+/* 설명 이미지 */
+.info-img {
+  position: relative;
+  max-width: 90%; max-height: 90%;
+  z-index: 100000;
+  pointer-events: none;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
