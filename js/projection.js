@@ -195,13 +195,7 @@
       ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
       // VFX 합성 (기존 로직 유지)
-      if (vfxVideo.readyState >= 2) {
-          ctx.globalCompositeOperation = 'screen'; 
-          ctx.globalAlpha = 0.7; 
-          ctx.drawImage(vfxVideo, 0, 0, canvas.width, canvas.height);
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.globalAlpha = 1.0;
-      }
+      
       ctx.restore();
   }
 
